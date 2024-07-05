@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Gallery</title>
+</head>
+<body>
+    <h1>Image Gallery</h1>
+    <div>
+        <% images.forEach(function(image) { %>
+            <div>
+                <img src="/<%= image.path %>" alt="Image" style="width: 200px; height: auto;" />
+            </div>
+        <% }); %>
+    </div>
+    <a href="/upload">Upload More Images</a>
+</body>
+</html>
