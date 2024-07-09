@@ -2,13 +2,26 @@
 <html>
 <head>
     <title>Image Gallery</title>
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+    <%- include('navbar') %>
     <h1>Image Gallery</h1>
     <div>
         <% images.forEach(function(image) { %>
             <div>
-                <img src="/<%= image.path %>" alt="Image" style="width: 200px; height: auto;" />
+                <a href="/image/<%= image.id %>">
+                    <img src="/<%= image.path %>" alt="Image" style="width: 200px; height: auto;" />
+                </a>
+                <% if (image.children.length > 0) { %>
+                    <div class="thumbnail-container">
+                        <% image.children.forEach(function(childImage) { %>
+                            <a href="/image/<%= childImage.id %>">
+                                <img src="/<%= childImage.path %>" alt="Image" class="thumbnail" />
+                            </a>
+                        <% }); %>
+                    </div>
+                <% } %>
             </div>
         <% }); %>
     </div>

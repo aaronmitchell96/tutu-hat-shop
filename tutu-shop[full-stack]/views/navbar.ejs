@@ -1,0 +1,23 @@
+<!-- navbar.ejs -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Navbar</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="navbar">
+        <a href="/" class="<%= activePage === 'home' ? 'active' : '' %>">Home</a>
+        <a href="/gallery" class="<%= activePage === 'gallery' ? 'active' : '' %>">Gallery</a>
+        <% if (user) { %>
+            <% if (user.role === 'admin') { %>
+                <a href="/upload" class="<%= activePage === 'upload' ? 'active' : '' %>">Upload</a>
+            <% } %>
+            <span class="navbar-username">Welcome, <%= user.username %>!</span>
+            <a href="/logout">Logout</a>
+        <% } else { %>
+            <a href="/login" class="<%= activePage === 'login' ? 'active' : '' %>">Login</a>
+        <% } %>
+    </div>
+</body>
+</html>

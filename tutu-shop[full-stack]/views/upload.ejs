@@ -2,11 +2,150 @@
 <html>
 <head>
     <title>Upload Image</title>
+    <script>
+        function showDropdowns() {
+            var category = document.getElementById("category").value;
+            var hatDiv = document.getElementById("hatDiv");
+            var accessoryDiv = document.getElementById("accessoryDiv");
+            var genderDiv = document.getElementById("genderDiv");
+            var menHatDiv = document.getElementById("menHatDiv");
+            var womenHatDiv = document.getElementById("womenHatDiv");
+
+            hatDiv.style.display = "none";
+            accessoryDiv.style.display = "none";
+            genderDiv.style.display = "none";
+            menHatDiv.style.display = "none";
+            womenHatDiv.style.display = "none";
+
+            if (category === "hat") {
+                hatDiv.style.display = "block";
+                genderDiv.style.display = "block";
+            } else if (category === "accessory") {
+                accessoryDiv.style.display = "block";
+            }
+        }
+
+        function showHatTypes() {
+            var gender = document.getElementById("gender").value;
+            var menHatDiv = document.getElementById("menHatDiv");
+            var womenHatDiv = document.getElementById("womenHatDiv");
+
+            menHatDiv.style.display = "none";
+            womenHatDiv.style.display = "none";
+
+            if (gender === "men") {
+                menHatDiv.style.display = "block";
+            } else if (gender === "women") {
+                womenHatDiv.style.display = "block";
+            }
+        }
+
+        function enableRelevantInputs() {
+            var category = document.getElementById("category").value;
+            var gender = document.getElementById("gender").value;
+
+            // Disable all relevant inputs
+            document.getElementById("accessoryType").disabled = true;
+            document.getElementById("menHatType").disabled = true;
+            document.getElementById("womenHatType").disabled = true;
+            document.getElementById("gender").disabled = true;
+
+            if (category === "hat") {
+                document.getElementById("gender").disabled = false;
+                if (gender === "men") {
+                    document.getElementById("menHatType").disabled = false;
+                } else if (gender === "women") {
+                    document.getElementById("womenHatType").disabled = false;
+                }
+            } else if (category === "accessory") {
+                document.getElementById("accessoryType").disabled = false;
+            }
+        }
+    </script>
 </head>
 <body>
+    <%- include('navbar') %>
     <h1>Upload an Image</h1>
-    <form action="/upload" method="POST" enctype="multipart/form-data">
-        <input type="file" name="image" />
+    <form action="/upload" method="POST" enctype="multipart/form-data" onsubmit="enableRelevantInputs()">
+
+        <div>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+
+        <div>
+            <label for="category">Category:</label>
+            <select id="category" name="category" onchange="showDropdowns()" required>
+                <option value="">Select</option>
+                <option value="hat">Hat</option>
+                <option value="accessory">Accessory</option>
+            </select>
+        </div>
+
+        <div id="hatDiv" style="display:none;">
+            <div id="genderDiv">
+                <label for="gender">Gender:</label>
+                <select id="gender" name="gender" onchange="showHatTypes()" required>
+                    <option value="">Select</option>
+                    <option value="men">Men</option>
+                    <option value="women">Women</option>
+                </select>
+            </div>
+
+            <div id="menHatDiv" style="display:none;">
+                <label for="menHatType">Type of Hat:</label>
+                <select id="menHatType" name="menHatType">
+                    <option value="">Select</option>
+                    <option value="fedora">Fedora</option>
+                    <option value="iv_cap">IV Cap</option>
+                    <option value="baseball_cap">Baseball Cap</option>
+                    <option value="bucket_hat">Bucket Hat</option>
+                    <option value="knit_hat">Knit Hat</option>
+                    <option value="kuffe">Kuffe</option>
+                </select>
+            </div>
+
+            <div id="womenHatDiv" style="display:none;">
+                <label for="womenHatType">Type of Hat:</label>
+                <select id="womenHatType" name="womenHatType">
+                    <option value="">Select</option>
+                    <option value="fedora">Fedora</option>
+                    <option value="church_hat">Church Hat</option>
+                    <option value="fascinator">Fascinator</option>
+                    <option value="beach_hat">Beach Hat</option>
+                    <option value="newsboy_cap">Newsboy Cap</option>
+                    <option value="baseball_cap">Baseball Cap</option>
+                    <option value="beret">Beret</option>
+                    <option value="beanie">Beanie</option>
+                    <option value="turban_headwear">Turban Headwear</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="accessoryDiv" style="display:none;">
+            <label for="accessoryType">Type of Accessory:</label>
+            <select id="accessoryType" name="accessoryType">
+                <option value="">Select</option>
+                <option value="scarf">Scarf</option>
+                <option value="earmuffs">Earmuffs</option>
+                <option value="face_mask">Face Mask</option>
+                <option value="bracelet">Bracelet</option>
+                <option value="necklace">Necklace</option>
+                <option value="belt">Belt</option>
+                <option value="tie">Tie</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="price">Price:</label>
+            <input type="number" id="price" name="price" min="0" step="0.01" required>
+        </div>
+        
+        <div>
+            <label for="image">Upload Image:</label>
+            <input type="file" name="image" required />
+        </div>
+
         <button type="submit">Upload</button>
     </form>
     <a href="/gallery">Go to Gallery</a>
