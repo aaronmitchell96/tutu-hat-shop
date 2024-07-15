@@ -9,8 +9,8 @@ const pool = new Pool({
 });
 
 const createAdminUser = async () => {
-    const username = 'admin';
-    const password = 'password';
+    const username = 'elsa';
+    const password = 'admin';
     const hashedPassword = await bcrypt.hash(password, 10);
     const role = 'admin';
 

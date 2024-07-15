@@ -19,7 +19,10 @@ const pool = new Pool({
 app.use(session({
     secret: 'your_secret_key',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 60 * 60 * 1000 // 1 hour
+    }
 }));
 
 // Middleware to parse form data
@@ -27,7 +30,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // Middleware to make session data available to all views
 app.use((req, res, next) => {
-    console.log("Session User:", req.session.user)
     res.locals.user = req.session.user;
     next();
 });
@@ -48,6 +50,15 @@ const upload = multer({ storage: storage });
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/images', express.static(path.join(__dirname, 'images'))); // Serve images statically
+
+// Middleware to restrict access to the upload route
+function requireAdmin(req, res, next) {
+    if (req.session.user && req.session.user.role === 'admin') {
+        next();
+    } else {
+        res.status(403).send("Access denied");
+    }
+}
 
 // Render the login page
 app.get("/login", (req, res) => {
@@ -76,15 +87,6 @@ app.get("/logout", (req, res) => {
     res.redirect("/login");
 });
 
-// Middleware to restrict access to the upload route
-function requireAdmin(req, res, next) {
-    if (req.session.user && req.session.user.role === 'admin') {
-        next();
-    } else {
-        res.status(403).send("Access denied");
-    }
-}
-
 //Route to render home page
 app.get("/", (req, res) => {
     res.render("home", { activePage: 'home' });
@@ -97,7 +99,7 @@ app.get("/upload", requireAdmin, (req, res) => {
 
 // Route to handle image upload
 app.post("/upload", upload.single("image"), async (req, res) => {
-    const { category, gender, menHatType, womenHatType, accessoryType, price, name } = req.body;
+    const { category, gender, menHatType, womenHatType, accessoryType, price, name, color, details } = req.body;
     const filename = req.file.filename;
     const filepath = req.file.path;
     let itemType = "";
@@ -121,8 +123,8 @@ app.post("/upload", upload.single("image"), async (req, res) => {
 
     // Insert new image with or without parent_id
     await pool.query(
-        'INSERT INTO images (filename, path, category, gender, type, price, name, parent_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-        [filename, filepath, category, gender, itemType, price, name, parent_id]
+        'INSERT INTO images (filename, path, category, gender, type, price, name, color, details, parent_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+        [filename, filepath, category, gender, itemType, price, name, color, details, parent_id]
     );
 
     res.send("Image uploaded");
@@ -173,6 +175,12 @@ app.get("/image/:id", async (req, res) => {
     } else {
         res.status(404).send("Image not found");
     }
+});
+
+// Route to handle image deletion with requireAdmin middleware
+app.post("/image/:id/delete", requireAdmin, async (req, res) => {
+    await pool.query('DELETE FROM images WHERE id = $1', [req.params.id]);
+    res.redirect("/gallery");
 });
 
 app.listen(3001, () => {

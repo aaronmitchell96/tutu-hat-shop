@@ -85,7 +85,7 @@
         <div id="hatDiv" style="display:none;">
             <div id="genderDiv">
                 <label for="gender">Gender:</label>
-                <select id="gender" name="gender" onchange="showHatTypes()" required>
+                <select id="gender" name="gender" onchange="showHatTypes()">
                     <option value="">Select</option>
                     <option value="men">Men</option>
                     <option value="women">Women</option>
@@ -134,6 +134,16 @@
                 <option value="belt">Belt</option>
                 <option value="tie">Tie</option>
             </select>
+        </div>
+
+        <div>
+            <label for="color">Color:</label>
+            <input type="text" id="color" name="color" required>
+        </div>
+
+        <div>
+            <label for="details">Details:</label>
+            <input type="text" id="details" name="details">
         </div>
 
         <div>
