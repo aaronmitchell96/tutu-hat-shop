@@ -4,7 +4,8 @@ const path = require('path');
 const { Pool } = require("pg");
 const dotenv = require("dotenv");
 const session = require("express-session");
-const bcrypt = require("bcrypt")
+const pgSession = require("connect-pg-simple")(session);
+const bcrypt = require("bcrypt");
 
 dotenv.config();
 
@@ -13,10 +14,17 @@ const app = express();
 // Configure PostgreSQL
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 // Set up session
 app.use(session({
+    store: new pgSession({
+        pool: pool,
+        tableName: 'session'
+    }),
     secret: 'your_secret_key',
     resave: false,
     saveUninitialized: false,
@@ -62,7 +70,7 @@ function requireAdmin(req, res, next) {
 
 // Render the login page
 app.get("/login", (req, res) => {
-    res.render("login", { activePage: 'login'});
+    res.render("login", { activePage: 'login' });
 });
 
 // Handle login form submission
@@ -70,11 +78,9 @@ app.post("/login", async (req, res) => {
     const { username, password } = req.body;
     const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
     const user = result.rows[0];
-    console.log(user)
 
     if (user && await bcrypt.compare(password, user.password)) {
         req.session.user = { id: user.id, username: user.username, role: user.role };
-        console.log("User logged in: ", req.session.user); // Log session user after setting it
         res.redirect("/gallery");
     } else {
         res.send("Invalid username or password");
@@ -87,7 +93,7 @@ app.get("/logout", (req, res) => {
     res.redirect("/login");
 });
 
-//Route to render home page
+// Route to render home page
 app.get("/", (req, res) => {
     res.render("home", { activePage: 'home' });
 })
@@ -155,6 +161,7 @@ app.get("/gallery", async (req, res) => {
 
     res.render("gallery", { images: organizedImages, activePage: 'gallery' });
 });
+
 // Route to render image details page
 app.get("/image/:id", async (req, res) => {
     const imageResult = await pool.query('SELECT * FROM images WHERE id = $1', [req.params.id]);
@@ -183,6 +190,8 @@ app.post("/image/:id/delete", requireAdmin, async (req, res) => {
     res.redirect("/gallery");
 });
 
-app.listen(3001, () => {
-    console.log("Server is running on port 3001");
+// Start server on the port defined by Heroku
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
