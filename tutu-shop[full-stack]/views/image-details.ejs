@@ -3,6 +3,22 @@
 <head>
     <title>Image Details</title>
     <link rel="stylesheet" href="/styles.css">
+    <script>
+        function showQuantity() {
+            var sizes = <%- JSON.stringify(sizes) %>;
+            var selectedSize = document.getElementById("sizeDropdown").value;
+            var quantityText = "";
+
+            for (var i = 0; i < sizes.length; i++) {
+                if (sizes[i].size === selectedSize) {
+                    quantityText = sizes[i].quantity + " remaining";
+                    break;
+                }
+            }
+
+            document.getElementById("quantityDisplay").innerText = quantityText;
+        }
+    </script>
 </head>
 <body>
     <%- include('navbar') %>
@@ -34,6 +50,17 @@
         <p>Price: <%= image.price %></p>
         <p>Color: <%= image.color %></p>
         <p>Details: <%= image.details %></p>
+
+        <div>
+            <label for="sizeDropdown">Select Size:</label>
+            <select id="sizeDropdown" name="size" onchange="showQuantity()">
+                <option value="">Select a size</option>
+                <% sizes.forEach(function(size) { %>
+                    <option value="<%= size.size %>"><%= size.size %></option>
+                <% }); %>
+            </select>
+        </div>
+        <p id="quantityDisplay"></p>
 
         <% if (user && user.role === 'admin') { %>
             <form action="/image/<%= image.id %>/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this image?');">

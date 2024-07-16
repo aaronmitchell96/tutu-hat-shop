@@ -105,7 +105,7 @@ app.get("/upload", requireAdmin, (req, res) => {
 
 // Route to handle image upload
 app.post("/upload", upload.single("image"), async (req, res) => {
-    const { category, gender, menHatType, womenHatType, accessoryType, price, name, color, details } = req.body;
+    const { category, gender, menHatType, womenHatType, accessoryType, price, name, color, details, sizes, quantities } = req.body;
     const filename = req.file.filename;
     const filepath = req.file.path;
     let itemType = "";
@@ -116,26 +116,52 @@ app.post("/upload", upload.single("image"), async (req, res) => {
         itemType = accessoryType;
     }
 
-    // Check for existing record
-    const result = await pool.query(
-        'SELECT id FROM images WHERE category = $1 AND gender = $2 AND type = $3 AND name = $4 AND parent_id IS NULL',
-        [category, gender, itemType, name]
-    );
+    try {
+        // Start a transaction
+        await pool.query('BEGIN');
 
-    let parent_id = null;
-    if (result.rows.length > 0) {
-        parent_id = result.rows[0].id;
+        // Check for existing record
+        const result = await pool.query(
+            'SELECT id FROM images WHERE category = $1 AND gender = $2 AND type = $3 AND name = $4 AND parent_id IS NULL',
+            [category, gender, itemType, name]
+        );
+
+        let parent_id = null;
+        if (result.rows.length > 0) {
+            parent_id = result.rows[0].id;
+        }
+
+        // Insert new image with or without parent_id
+        const imageResult = await pool.query(
+            'INSERT INTO images (filename, path, category, gender, type, price, name, color, details, parent_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id',
+            [filename, filepath, category, gender, itemType, price, name, color, details, parent_id]
+        );
+
+        const imageId = imageResult.rows[0].id;
+
+        // Insert sizes and quantities into sizes table
+        const sizeQuantityPairs = sizes.map((size, index) => [imageId, size, quantities[index]]);
+
+        const sizeQuery = `
+            INSERT INTO sizes (product_id, size, quantity)
+            VALUES ($1, $2, $3)
+        `;
+
+        for (const pair of sizeQuantityPairs) {
+            await pool.query(sizeQuery, pair);
+        }
+
+        // Commit transaction
+        await pool.query('COMMIT');
+
+        res.send("Image uploaded with sizes");
+    } catch (err) {
+        // Rollback transaction on error
+        await pool.query('ROLLBACK');
+        console.error(err);
+        res.status(500).send("Error uploading product");
     }
-
-    // Insert new image with or without parent_id
-    await pool.query(
-        'INSERT INTO images (filename, path, category, gender, type, price, name, color, details, parent_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
-        [filename, filepath, category, gender, itemType, price, name, color, details, parent_id]
-    );
-
-    res.send("Image uploaded");
 });
-
 // Route to render the gallery page
 app.get("/gallery", async (req, res) => {
     const result = await pool.query('SELECT * FROM images');
@@ -164,10 +190,14 @@ app.get("/gallery", async (req, res) => {
 
 // Route to render image details page
 app.get("/image/:id", async (req, res) => {
-    const imageResult = await pool.query('SELECT * FROM images WHERE id = $1', [req.params.id]);
-    const image = imageResult.rows[0];
+    try {
+        const imageResult = await pool.query('SELECT * FROM images WHERE id = $1', [req.params.id]);
+        const image = imageResult.rows[0];
 
-    if (image) {
+        if (!image) {
+            return res.status(404).send("Image not found");
+        }
+
         let parentImage = null;
         if (image.parent_id) {
             const parentImageResult = await pool.query('SELECT * FROM images WHERE id = $1', [image.parent_id]);
@@ -178,9 +208,20 @@ app.get("/image/:id", async (req, res) => {
         const childImagesResult = await pool.query('SELECT * FROM images WHERE parent_id = $1', [parentId]);
         const childImages = childImagesResult.rows;
 
-        res.render("image-details", { image: image, childImages: childImages, parentImage: parentImage, activePage: 'image-details' });
-    } else {
-        res.status(404).send("Image not found");
+        // Fetch sizes and quantities
+        const sizesResult = await pool.query('SELECT size, quantity FROM sizes WHERE product_id = $1', [image.id]);
+        const sizes = sizesResult.rows;
+
+        res.render("image-details", { 
+            image: image, 
+            childImages: childImages, 
+            parentImage: parentImage, 
+            sizes: sizes, 
+            activePage: 'image-details' 
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
     }
 });
 
