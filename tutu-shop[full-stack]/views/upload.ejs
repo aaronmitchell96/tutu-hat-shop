@@ -90,108 +90,110 @@
 </head>
 <body>
     <%- include('navbar') %>
-    <h1>Upload an Image</h1>
-    <form action="/upload" method="POST" enctype="multipart/form-data" onsubmit="enableRelevantInputs()">
+    <div class="main-content">
+        <h1>Upload an Image</h1>
+        <form action="/upload" method="POST" enctype="multipart/form-data" onsubmit="enableRelevantInputs()">
 
-        <div>
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-        </div>
+            <div>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
 
-        <div>
-            <label for="category">Category:</label>
-            <select id="category" name="category" onchange="showDropdowns()" required>
-                <option value="">Select</option>
-                <option value="hat">Hat</option>
-                <option value="accessory">Accessory</option>
-            </select>
-        </div>
-
-        <div id="hatDiv" style="display:none;">
-            <div id="genderDiv">
-                <label for="gender">Gender:</label>
-                <select id="gender" name="gender" onchange="showHatTypes()">
+            <div>
+                <label for="category">Category:</label>
+                <select id="category" name="category" onchange="showDropdowns()" required>
                     <option value="">Select</option>
-                    <option value="men">Men</option>
-                    <option value="women">Women</option>
+                    <option value="hat">Hat</option>
+                    <option value="accessory">Accessory</option>
                 </select>
             </div>
 
-            <div id="menHatDiv" style="display:none;">
-                <label for="menHatType">Type of Hat:</label>
-                <select id="menHatType" name="menHatType">
+            <div id="hatDiv" style="display:none;">
+                <div id="genderDiv">
+                    <label for="gender">Gender:</label>
+                    <select id="gender" name="gender" onchange="showHatTypes()">
+                        <option value="">Select</option>
+                        <option value="men">Men</option>
+                        <option value="women">Women</option>
+                    </select>
+                </div>
+
+                <div id="menHatDiv" style="display:none;">
+                    <label for="menHatType">Type of Hat:</label>
+                    <select id="menHatType" name="menHatType">
+                        <option value="">Select</option>
+                        <option value="fedora">Fedora</option>
+                        <option value="iv_cap">IV Cap</option>
+                        <option value="baseball_cap">Baseball Cap</option>
+                        <option value="bucket_hat">Bucket Hat</option>
+                        <option value="knit_hat">Knit Hat</option>
+                        <option value="kuffe">Kuffe</option>
+                    </select>
+                </div>
+
+                <div id="womenHatDiv" style="display:none;">
+                    <label for="womenHatType">Type of Hat:</label>
+                    <select id="womenHatType" name="womenHatType">
+                        <option value="">Select</option>
+                        <option value="fedora">Fedora</option>
+                        <option value="church_hat">Church Hat</option>
+                        <option value="fascinator">Fascinator</option>
+                        <option value="beach_hat">Beach Hat</option>
+                        <option value="newsboy_cap">Newsboy Cap</option>
+                        <option value="baseball_cap">Baseball Cap</option>
+                        <option value="beret">Beret</option>
+                        <option value="beanie">Beanie</option>
+                        <option value="turban_headwear">Turban Headwear</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="accessoryDiv" style="display:none;">
+                <label for="accessoryType">Type of Accessory:</label>
+                <select id="accessoryType" name="accessoryType">
                     <option value="">Select</option>
-                    <option value="fedora">Fedora</option>
-                    <option value="iv_cap">IV Cap</option>
-                    <option value="baseball_cap">Baseball Cap</option>
-                    <option value="bucket_hat">Bucket Hat</option>
-                    <option value="knit_hat">Knit Hat</option>
-                    <option value="kuffe">Kuffe</option>
+                    <option value="scarf">Scarf</option>
+                    <option value="earmuffs">Earmuffs</option>
+                    <option value="face_mask">Face Mask</option>
+                    <option value="bracelet">Bracelet</option>
+                    <option value="necklace">Necklace</option>
+                    <option value="belt">Belt</option>
+                    <option value="tie">Tie</option>
                 </select>
             </div>
 
-            <div id="womenHatDiv" style="display:none;">
-                <label for="womenHatType">Type of Hat:</label>
-                <select id="womenHatType" name="womenHatType">
-                    <option value="">Select</option>
-                    <option value="fedora">Fedora</option>
-                    <option value="church_hat">Church Hat</option>
-                    <option value="fascinator">Fascinator</option>
-                    <option value="beach_hat">Beach Hat</option>
-                    <option value="newsboy_cap">Newsboy Cap</option>
-                    <option value="baseball_cap">Baseball Cap</option>
-                    <option value="beret">Beret</option>
-                    <option value="beanie">Beanie</option>
-                    <option value="turban_headwear">Turban Headwear</option>
-                </select>
+            <div>
+                <label for="color">Color:</label>
+                <input type="text" id="color" name="color" required>
             </div>
-        </div>
 
-        <div id="accessoryDiv" style="display:none;">
-            <label for="accessoryType">Type of Accessory:</label>
-            <select id="accessoryType" name="accessoryType">
-                <option value="">Select</option>
-                <option value="scarf">Scarf</option>
-                <option value="earmuffs">Earmuffs</option>
-                <option value="face_mask">Face Mask</option>
-                <option value="bracelet">Bracelet</option>
-                <option value="necklace">Necklace</option>
-                <option value="belt">Belt</option>
-                <option value="tie">Tie</option>
-            </select>
-        </div>
-
-        <div>
-            <label for="color">Color:</label>
-            <input type="text" id="color" name="color" required>
-        </div>
-
-        <div>
-            <label for="details">Details:</label>
-            <input type="text" id="details" name="details">
-        </div>
-
-        <div>
-            <label for="price">Price:</label>
-            <input type="number" id="price" name="price" min="0" step="0.01" required>
-        </div>
-
-        <div id="sizeQuantityDiv">
-            <label>Sizes and Quantities:</label>
-            <div class="size-quantity-pair">
-                <input type="text" name="sizes[]" placeholder="Size" required>
-                <input type="number" name="quantities[]" placeholder="Quantity" min="1" required>
+            <div>
+                <label for="details">Details:</label>
+                <input type="text" id="details" name="details">
             </div>
-        </div>
-        <button type="button" onclick="addSizeQuantity()">Add Size and Quantity</button>
-        
-        <div>
-            <label for="image">Upload Image:</label>
-            <input type="file" name="image" required />
-        </div>
 
-        <button type="submit">Upload</button>
-    </form>
-    <a href="/gallery">Go to Gallery</a>
+            <div>
+                <label for="price">Price:</label>
+                <input type="number" id="price" name="price" min="0" step="0.01" required>
+            </div>
+
+            <div id="sizeQuantityDiv">
+                <label>Sizes and Quantities:</label>
+                <div class="size-quantity-pair">
+                    <input type="text" name="sizes[]" placeholder="Size" required>
+                    <input type="number" name="quantities[]" placeholder="Quantity" min="1" required>
+                </div>
+            </div>
+            <button type="button" onclick="addSizeQuantity()">Add Size and Quantity</button>
+            
+            <div>
+                <label for="image">Upload Image:</label>
+                <input type="file" name="image" required />
+            </div>
+
+            <button type="submit">Upload</button>
+        </form>
+        <a href="/gallery">Go to Gallery</a>
+    </div>
 </body>
 </html>

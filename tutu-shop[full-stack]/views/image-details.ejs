@@ -2,7 +2,9 @@
 <html>
 <head>
     <title>Image Details</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/styles.css">
+
     <script>
         function showQuantity() {
             var sizes = <%- JSON.stringify(sizes) %>;
@@ -19,56 +21,59 @@
             document.getElementById("quantityDisplay").innerText = quantityText;
         }
     </script>
+
 </head>
 <body>
-    <%- include('navbar') %>
-    <h1>Image Details</h1>
-    <div>
-        <img src="/<%= image.path %>" alt="Image" style="width: 400px; height: auto;" />
-        <% if (parentImage || childImages.length > 0) { %>
-            <h2>Related Images</h2>
-            <div class="thumbnail-container">
-                <% if (parentImage && parentImage.id !== image.id) { %>
-                    <a href="/image/<%= parentImage.id %>">
-                        <img src="/<%= parentImage.path %>" alt="Image" class="thumbnail" />
-                    </a>
-                <% } %>
-                <% childImages.forEach(function(childImage) { %>
-                    <% if (childImage.id !== image.id) { %>
-                        <a href="/image/<%= childImage.id %>">
-                            <img src="/<%= childImage.path %>" alt="Image" class="thumbnail" />
+        <%- include('navbar') %>
+    <div class="main-content">
+        <h1>Image Details</h1>
+        <div>
+            <img src="/<%= image.path %>" alt="Image" style="width: 400px; height: auto;" />
+            <% if (parentImage || childImages.length > 0) { %>
+                <h2>Related Images</h2>
+                <div class="thumbnail-container">
+                    <% if (parentImage && parentImage.id !== image.id) { %>
+                        <a href="/image/<%= parentImage.id %>">
+                            <img src="/<%= parentImage.path %>" alt="Image" class="thumbnail" />
                         </a>
                     <% } %>
-                <% }); %>
+                    <% childImages.forEach(function(childImage) { %>
+                        <% if (childImage.id !== image.id) { %>
+                            <a href="/image/<%= childImage.id %>">
+                                <img src="/<%= childImage.path %>" alt="Image" class="thumbnail" />
+                            </a>
+                        <% } %>
+                    <% }); %>
+                </div>
+            <% } %>
+            <p>Name: <%= image.name %></p>
+            <p>Uploaded At: <%= image.uploaded_at %></p>
+            <p>Category: <%= image.category %></p>
+            <p>Gender: <%= image.gender %></p>
+            <p>Type: <%= image.type %></p>
+            <p>Price: <%= image.price %></p>
+            <p>Color: <%= image.color %></p>
+            <p>Details: <%= image.details %></p>
+
+            <div>
+                <label for="sizeDropdown">Select Size:</label>
+                <select id="sizeDropdown" name="size" onchange="showQuantity()">
+                    <option value="">Select a size</option>
+                    <% sizes.forEach(function(size) { %>
+                        <option value="<%= size.size %>"><%= size.size %></option>
+                    <% }); %>
+                </select>
             </div>
-        <% } %>
-        <p>Name: <%= image.name %></p>
-        <p>Uploaded At: <%= image.uploaded_at %></p>
-        <p>Category: <%= image.category %></p>
-        <p>Gender: <%= image.gender %></p>
-        <p>Type: <%= image.type %></p>
-        <p>Price: <%= image.price %></p>
-        <p>Color: <%= image.color %></p>
-        <p>Details: <%= image.details %></p>
+            <p id="quantityDisplay"></p>
 
-        <div>
-            <label for="sizeDropdown">Select Size:</label>
-            <select id="sizeDropdown" name="size" onchange="showQuantity()">
-                <option value="">Select a size</option>
-                <% sizes.forEach(function(size) { %>
-                    <option value="<%= size.size %>"><%= size.size %></option>
-                <% }); %>
-            </select>
+            <% if (user && user.role === 'admin') { %>
+                <form action="/image/<%= image.id %>/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this image?');">
+                    <button type="submit">Delete</button>
+                </form>
+            <% } %>
+
         </div>
-        <p id="quantityDisplay"></p>
-
-        <% if (user && user.role === 'admin') { %>
-            <form action="/image/<%= image.id %>/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this image?');">
-                <button type="submit">Delete</button>
-            </form>
-        <% } %>
-
+        <a href="/gallery">Back to Gallery</a>
     </div>
-    <a href="/gallery">Back to Gallery</a>
 </body>
 </html>
