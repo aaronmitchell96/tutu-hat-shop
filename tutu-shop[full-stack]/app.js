@@ -105,15 +105,13 @@ app.get("/upload", requireAdmin, (req, res) => {
 
 // Route to handle image upload
 app.post("/upload", upload.single("image"), async (req, res) => {
-    const { category, gender, menHatType, womenHatType, accessoryType, price, name, color, details, sizes, quantities } = req.body;
+    const { category, hatType, accessoryType, price, name, color, details, sizes, quantities } = req.body;
+    let { gender } = req.body; // Change this to let
     const filename = req.file.filename;
     const filepath = req.file.path;
-    let itemType = "";
-
-    if (category === "hat") {
-        itemType = gender === "men" ? menHatType : womenHatType;
-    } else if (category === "accessory") {
-        itemType = accessoryType;
+    let itemType = category === "hat" ? hatType : accessoryType;
+    if (!gender) {
+        gender = 'unisex';
     }
 
     try {
@@ -122,8 +120,8 @@ app.post("/upload", upload.single("image"), async (req, res) => {
 
         // Check for existing record
         const result = await pool.query(
-            'SELECT id FROM images WHERE category = $1 AND gender = $2 AND type = $3 AND name = $4 AND parent_id IS NULL',
-            [category, gender, itemType, name]
+            'SELECT id FROM images WHERE category = $1 AND (gender = $2 OR $2 IS NULL) AND type = $3 AND name = $4 AND parent_id IS NULL',
+            [category, gender || null, itemType, name]
         );
 
         let parent_id = null;
@@ -164,7 +162,41 @@ app.post("/upload", upload.single("image"), async (req, res) => {
 });
 // Route to render the gallery page
 app.get("/gallery", async (req, res) => {
-    const result = await pool.query('SELECT * FROM images');
+    const { category, gender, hatType, accessoryType, color, minPrice, maxPrice } = req.query;
+
+    let query = 'SELECT * FROM images WHERE 1=1';
+    const params = [];
+
+    if (category) {
+        query += ' AND category = $' + (params.length + 1);
+        params.push(category);
+    }
+    if (gender) {
+        query += ' AND gender = $' + (params.length + 1);
+        params.push(gender);
+    }
+    if (hatType) {
+        query += ' AND type = $' + (params.length + 1);
+        params.push(hatType);
+    }
+    if (accessoryType) {
+        query += ' AND type = $' + (params.length + 1);
+        params.push(accessoryType);
+    }
+    if (color) {
+        query += ' AND color ILIKE $' + (params.length + 1);
+        params.push('%' + color + '%');
+    }
+    if (minPrice) {
+        query += ' AND price >= $' + (params.length + 1);
+        params.push(minPrice);
+    }
+    if (maxPrice) {
+        query += ' AND price <= $' + (params.length + 1);
+        params.push(maxPrice);
+    }
+
+    const result = await pool.query(query, params);
     const images = result.rows;
 
     // Organize images into a hierarchy
@@ -185,8 +217,37 @@ app.get("/gallery", async (req, res) => {
 
     const organizedImages = Object.values(imageMap);
 
-    res.render("gallery", { images: organizedImages, activePage: 'gallery' });
+    // Get distinct hat types
+    const hatTypesResult = await pool.query('SELECT DISTINCT type FROM images WHERE category = $1', ['hat']);
+    const hatTypes = hatTypesResult.rows.map(row => row.type);
+
+    // Get distinct accessory types
+    const accessoryTypesResult = await pool.query('SELECT DISTINCT type FROM images WHERE category = $1', ['accessory']);
+    const accessoryTypes = accessoryTypesResult.rows.map(row => row.type);
+
+    res.render("gallery", {
+        images: organizedImages,
+        activePage: 'gallery',
+        category: category || '',
+        gender: gender || '',
+        hatType: hatType || '',
+        accessoryType: accessoryType || '',
+        color: color || '',
+        minPrice: minPrice || '',
+        maxPrice: maxPrice || '',
+        hatTypes,
+        accessoryTypes
+    });
 });
+
+
+
+app.get('/hat-types', async (req, res) => {
+    const result = await pool.query('SELECT DISTINCT type FROM images WHERE category = $1', ['hat']);
+    const hatTypes = result.rows.map(row => row.type);
+    res.json(hatTypes);
+});
+
 
 // Route to render image details page
 app.get("/image/:id", async (req, res) => {

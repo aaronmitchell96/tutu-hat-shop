@@ -4,30 +4,66 @@
     <title>Image Gallery</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/styles.css">
+    <script>
+        // Function to show/hide filters based on category selection
+        function handleCategoryChange() {
+            var category = document.getElementById("category").value;
+            var hatTypeDiv = document.getElementById("hatTypeDiv");
+            var accessoryTypeDiv = document.getElementById("accessoryTypeDiv");
+
+            if (category === "hat") {
+                hatTypeDiv.style.display = "block";
+                accessoryTypeDiv.style.display = "none";
+            } else if (category === "accessory") {
+                hatTypeDiv.style.display = "none";
+                accessoryTypeDiv.style.display = "block";
+            } else {
+                hatTypeDiv.style.display = "none";
+                accessoryTypeDiv.style.display = "none";
+            }
+        }
+
+        // Run the function on page load to ensure correct display
+        window.onload = function() {
+            handleCategoryChange();
+        };
+    </script>
 </head>
 <body>
     <%- include('navbar') %>
-    <div class="main-content">
-        <h1>Image Gallery</h1>
-        <div>
-            <% images.forEach(function(image) { %>
-                <div>
-                    <a href="/image/<%= image.id %>">
-                        <img src="/<%= image.path %>" alt="Image" style="width: 200px; height: auto;" />
-                    </a>
-                    <% if (image.children.length > 0) { %>
-                        <div class="thumbnail-container">
-                            <% image.children.forEach(function(childImage) { %>
-                                <a href="/image/<%= childImage.id %>">
-                                    <img src="/<%= childImage.path %>" alt="Image" class="thumbnail" />
-                                </a>
-                            <% }); %>
-                        </div>
-                    <% } %>
-                </div>
-            <% }); %>
-        </div>
-        <a href="/upload">Upload More Images</a>
+    <h1>Image Gallery</h1>
+
+    <!-- Include Filter Bar -->
+    <%- include('filter-bar', {
+        category: category || '',
+        gender: gender || '',
+        hatType: hatType || '',
+        accessoryType: accessoryType || '',
+        color: color || '',
+        minPrice: minPrice || '',
+        maxPrice: maxPrice || '',
+        hatTypes: hatTypes,
+        accessoryTypes: accessoryTypes
+    }) %>
+
+    <div>
+        <% images.forEach(function(image) { %>
+            <div>
+                <a href="/image/<%= image.id %>">
+                    <img src="/<%= image.path %>" alt="Image" style="width: 200px; height: auto;" />
+                </a>
+                <% if (image.children.length > 0) { %>
+                    <div class="thumbnail-container">
+                        <% image.children.forEach(function(childImage) { %>
+                            <a href="/image/<%= childImage.id %>">
+                                <img src="/<%= childImage.path %>" alt="Image" class="thumbnail" />
+                            </a>
+                        <% }); %>
+                    </div>
+                <% } %>
+            </div>
+        <% }); %>
     </div>
+    <a href="/upload">Upload More Images</a>
 </body>
 </html>

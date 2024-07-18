@@ -1,3 +1,4 @@
+/* styles.css */
 body {
     font-family: Arial, sans-serif;
 }
@@ -94,3 +95,5 @@ body {
 .blur {
     filter: blur(5px);
 }
+
+/* Filter bar styles 

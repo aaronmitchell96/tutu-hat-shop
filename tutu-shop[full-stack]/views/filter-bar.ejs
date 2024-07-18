@@ -1,0 +1,59 @@
+<!-- views/filter-bar.ejs -->
+<form action="/gallery" method="GET">
+    <div>
+        <label for="category">Category:</label>
+        <select id="category" name="category" onchange="handleCategoryChange()">
+            <option value="">All</option>
+            <option value="hat" <%= category === 'hat' ? 'selected' : '' %>>Hat</option>
+            <option value="accessory" <%= category === 'accessory' ? 'selected' : '' %>>Accessory</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="gender">Gender:</label>
+        <select id="gender" name="gender">
+            <option value="">All</option>
+            <option value="men" <%= gender === 'men' ? 'selected' : '' %>>Men</option>
+            <option value="women" <%= gender === 'women' ? 'selected' : '' %>>Women</option>
+        </select>
+    </div>
+
+    <!-- Hat Type Dropdown (conditional display) -->
+    <div id="hatTypeDiv" style="display: <%= category === 'hat' ? 'block' : 'none' %>;">
+        <label for="hatType">Hat Type:</label>
+        <select id="hatType" name="hatType">
+            <option value="">All</option>
+            <% hatTypes.forEach(function(type) { %>
+                <option value="<%= type %>" <%= type === hatType ? 'selected' : '' %>><%= type %></option>
+            <% }); %>
+        </select>
+    </div>
+
+    <!-- Accessory Type Dropdown (conditional display) -->
+    <div id="accessoryTypeDiv" style="display: <%= category === 'accessory' ? 'block' : 'none' %>;">
+        <label for="accessoryType">Accessory Type:</label>
+        <select id="accessoryType" name="accessoryType">
+            <option value="">All</option>
+            <% accessoryTypes.forEach(function(type) { %>
+                <option value="<%= type %>" <%= type === accessoryType ? 'selected' : '' %>><%= type %></option>
+            <% }); %>
+        </select>
+    </div>
+
+    <div>
+        <label for="color">Color:</label>
+        <input type="text" id="color" name="color" value="<%= color %>">
+    </div>
+
+    <div>
+        <label for="minPrice">Min Price:</label>
+        <input type="number" id="minPrice" name="minPrice" value="<%= minPrice %>">
+    </div>
+
+    <div>
+        <label for="maxPrice">Max Price:</label>
+        <input type="number" id="maxPrice" name="maxPrice" value="<%= maxPrice %>">
+    </div>
+
+    <button type="submit">Filter</button>
+</form>
